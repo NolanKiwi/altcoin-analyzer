@@ -14,13 +14,12 @@ and Ethereum) from their 2025 peak prices to the present day.
 
 ### Data Source
 
-All price data is sourced from [Binance](https://www.binance.com/) via the
-[CCXT](https://github.com/ccxt/ccxt) library. Binance provides comprehensive
-cryptocurrency data including:
+All price data is sourced from a crypto exchange (default: Bybit) via the
+[CCXT](https://github.com/ccxt/ccxt) library. The exchange provides:
 
 - Real-time and historical prices
 - Full OHLCV (Open, High, Low, Close, Volume) candle data
-- High rate limits (~1200 requests/minute) with no API key required
+- No API key required for public market data
 
 ### Methodology
 

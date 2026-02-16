@@ -299,23 +299,37 @@ class TestSetupLogging:
 class TestMainFunction:
     """Tests for the main() function."""
 
+    def _patch_main(self, tmp_path, mock_exchange):
+        """Return a context manager that patches main's dependencies."""
+        from contextlib import contextmanager
+
+        @contextmanager
+        def _ctx():
+            with patch("src.data_fetcher.ccxt") as mock_ccxt, \
+                 patch("src.data_fetcher.PRICES_CSV", tmp_path / "prices.csv"), \
+                 patch("src.data_fetcher.DATABASE_PATH", tmp_path / "test.db"), \
+                 patch("src.data_fetcher.DATA_DIR", tmp_path), \
+                 patch("src.data_fetcher.time.sleep"), \
+                 patch("src.data_fetcher.LOG_DIR", tmp_path / "logs"):
+                mock_ccxt.bybit.return_value = mock_exchange
+                mock_ccxt.NetworkError = ccxt.NetworkError
+                mock_ccxt.ExchangeNotAvailable = ccxt.ExchangeNotAvailable
+                mock_ccxt.ExchangeError = ccxt.ExchangeError
+                import logging
+                logging.getLogger().handlers.clear()
+                yield
+        return _ctx()
+
     def test_main_with_specific_coins(
         self, tmp_path: Path, sample_ohlcv_response
     ) -> None:
         """Test main with specific coin list."""
         from src.data_fetcher import main
 
-        mock_exchange = MagicMock(spec=ccxt.binance)
+        mock_exchange = MagicMock()
         mock_exchange.fetch_ohlcv.return_value = sample_ohlcv_response
 
-        with patch("src.data_fetcher.ccxt.binance", return_value=mock_exchange), \
-             patch("src.data_fetcher.PRICES_CSV", tmp_path / "prices.csv"), \
-             patch("src.data_fetcher.DATABASE_PATH", tmp_path / "test.db"), \
-             patch("src.data_fetcher.DATA_DIR", tmp_path), \
-             patch("src.data_fetcher.time.sleep"), \
-             patch("src.data_fetcher.LOG_DIR", tmp_path / "logs"):
-            import logging
-            logging.getLogger().handlers.clear()
+        with self._patch_main(tmp_path, mock_exchange):
             main(coins=["SOL"])
 
         assert (tmp_path / "prices.csv").exists()
@@ -324,17 +338,10 @@ class TestMainFunction:
         """Test main gracefully handles fetch failures."""
         from src.data_fetcher import main
 
-        mock_exchange = MagicMock(spec=ccxt.binance)
+        mock_exchange = MagicMock()
         mock_exchange.fetch_ohlcv.side_effect = ccxt.ExchangeError("bad symbol")
 
-        with patch("src.data_fetcher.ccxt.binance", return_value=mock_exchange), \
-             patch("src.data_fetcher.PRICES_CSV", tmp_path / "prices.csv"), \
-             patch("src.data_fetcher.DATABASE_PATH", tmp_path / "test.db"), \
-             patch("src.data_fetcher.DATA_DIR", tmp_path), \
-             patch("src.data_fetcher.time.sleep"), \
-             patch("src.data_fetcher.LOG_DIR", tmp_path / "logs"):
-            import logging
-            logging.getLogger().handlers.clear()
+        with self._patch_main(tmp_path, mock_exchange):
             # Should not raise
             main(coins=["BADCOIN"])
 
@@ -342,15 +349,8 @@ class TestMainFunction:
         """Test main when there's no new data to save."""
         from src.data_fetcher import main
 
-        mock_exchange = MagicMock(spec=ccxt.binance)
+        mock_exchange = MagicMock()
         mock_exchange.fetch_ohlcv.return_value = []
 
-        with patch("src.data_fetcher.ccxt.binance", return_value=mock_exchange), \
-             patch("src.data_fetcher.PRICES_CSV", tmp_path / "prices.csv"), \
-             patch("src.data_fetcher.DATABASE_PATH", tmp_path / "test.db"), \
-             patch("src.data_fetcher.DATA_DIR", tmp_path), \
-             patch("src.data_fetcher.time.sleep"), \
-             patch("src.data_fetcher.LOG_DIR", tmp_path / "logs"):
-            import logging
-            logging.getLogger().handlers.clear()
+        with self._patch_main(tmp_path, mock_exchange):
             main(coins=["EMPTY"])

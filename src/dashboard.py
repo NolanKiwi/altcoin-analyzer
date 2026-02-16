@@ -27,7 +27,8 @@ if st.sidebar.button("🔄 Refresh Data"):
     st.rerun()
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Data source: Binance via CCXT")
+from src.config import EXCHANGE_ID
+st.sidebar.caption(f"Data source: {EXCHANGE_ID.capitalize()} via CCXT")
 
 # Redirect to Home page
 home = st.Page("pages/1_🏠_Home.py", title="Home", icon="🏠", default=True)

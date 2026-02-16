@@ -1,6 +1,6 @@
-"""Fetch altcoin price data from Binance via CCXT.
+"""Fetch altcoin price data via CCXT.
 
-This module handles all data collection from the Binance exchange, including:
+This module handles all data collection from a crypto exchange, including:
 - Discovering top altcoins by USDT trading volume
 - Downloading historical OHLCV data
 - Saving data to both CSV and SQLite formats
@@ -22,6 +22,7 @@ from tqdm import tqdm
 from src.config import (
     DATA_DIR,
     DATABASE_PATH,
+    EXCHANGE_ID,
     EXCLUDE_SYMBOLS,
     LOG_DIR,
     MAX_RETRIES,
@@ -290,9 +291,10 @@ def main(update: bool = False, coins: list[str] | None = None,
     setup_logging()
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    exchange = ccxt.binance({"enableRateLimit": True})
+    exchange_class = getattr(ccxt, EXCHANGE_ID)
+    exchange = exchange_class({"enableRateLimit": True})
 
-    logger.info("Starting data fetch pipeline (Binance via CCXT)")
+    logger.info("Starting data fetch pipeline (%s via CCXT)", EXCHANGE_ID)
     logger.info("Date range: %s to now", START_DATE)
 
     if coins:

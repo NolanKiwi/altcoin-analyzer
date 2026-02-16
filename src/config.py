@@ -15,8 +15,9 @@ DATABASE_PATH = Path(os.getenv("DATABASE_PATH", DATA_DIR / "altcoins.db"))
 PRICES_CSV = DATA_DIR / "altcoin_prices.csv"
 RESULTS_CSV = DATA_DIR / "analysis_results.csv"
 
-# Binance via CCXT
-RATE_LIMIT_DELAY = 0.1  # seconds between requests (~1200 req/min on Binance)
+# Exchange via CCXT
+EXCHANGE_ID = os.getenv("EXCHANGE_ID", "bybit")
+RATE_LIMIT_DELAY = 0.1  # seconds between requests
 MAX_RETRIES = 3
 RETRY_BACKOFF_BASE = 2  # exponential backoff multiplier
 QUOTE_CURRENCY = "USDT"
