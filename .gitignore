@@ -1,5 +1,6 @@
-# Data
-data/
+# Data (keep CSVs, ignore generated db/json)
+data/*.db
+data/*.json
 logs/
 
 # Python
