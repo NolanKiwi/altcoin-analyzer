@@ -9,6 +9,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from src.auto_fetch import ensure_data
 from src.config import CACHE_TTL, PRICES_CSV, RESULTS_CSV
 
 st.set_page_config(page_title="Home - Altcoin Analyzer", page_icon="🏠", layout="wide")
@@ -32,6 +33,9 @@ def load_prices() -> pd.DataFrame:
 
 st.title("🏠 Dashboard Home")
 st.markdown("Overview of altcoin price drops from 2025 peaks.")
+
+if not ensure_data():
+    st.stop()
 
 results = load_results()
 if results.empty:

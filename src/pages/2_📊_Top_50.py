@@ -9,6 +9,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from src.auto_fetch import ensure_data
 from src.config import CACHE_TTL, RESULTS_CSV
 
 st.set_page_config(page_title="Top 50 - Altcoin Analyzer", page_icon="📊", layout="wide")
@@ -24,6 +25,9 @@ def load_results() -> pd.DataFrame:
 
 st.title("📊 Top 50 Biggest Drops")
 st.markdown("Altcoins ranked by largest percentage drop from their 2025 peak price.")
+
+if not ensure_data():
+    st.stop()
 
 results = load_results()
 if results.empty:

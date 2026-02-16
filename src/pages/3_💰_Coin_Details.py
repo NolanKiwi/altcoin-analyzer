@@ -10,6 +10,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from src.auto_fetch import ensure_data
 from src.config import CACHE_TTL, PRICES_CSV, RESULTS_CSV
 
 st.set_page_config(page_title="Coin Details - Altcoin Analyzer", page_icon="💰",
@@ -33,6 +34,9 @@ def load_prices() -> pd.DataFrame:
 
 
 st.title("💰 Coin Details")
+
+if not ensure_data():
+    st.stop()
 
 results = load_results()
 prices = load_prices()

@@ -10,6 +10,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.analyzer import rank_by_drop
+from src.auto_fetch import ensure_data
 from src.config import CACHE_TTL, PRICES_CSV
 
 st.set_page_config(page_title="All Coins - Altcoin Analyzer", page_icon="📋", layout="wide")
@@ -26,6 +27,9 @@ def load_all_drops() -> pd.DataFrame:
 
 st.title("📋 All Coins")
 st.markdown("Every tracked altcoin ranked by percentage drop from their 2025 peak price.")
+
+if not ensure_data():
+    st.stop()
 
 results = load_all_drops()
 if results.empty:
